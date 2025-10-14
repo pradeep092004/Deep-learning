@@ -1,0 +1,26 @@
+# requirements:
+# pip install SpeechRecognition pydub
+
+import speech_recognition as sr
+from pydub import AudioSegment
+
+def convert_audio_to_wav(input_path, wav_path="temp.wav"):
+    # If input is mp3 or other, convert to wav
+    AudioSegment.from_file(input_path).export(wav_path, format="wav")
+    return wav_path
+
+def transcribe_with_google(wav_path):
+    r = sr.Recognizer()
+    with sr.AudioFile(wav_path) as source:
+        audio = r.record(source)
+    try:
+        text = r.recognize_google(audio)  # default language=en-US
+        return text
+    except sr.UnknownValueError:
+        return ""  # couldn't understand
+    except sr.RequestError as e:
+        raise RuntimeError("API request failed: " + str(e))
+
+if __name__ == "__main__":
+    wav = convert_audio_to_wav("command.mp3", "cmd.wav")
+    print("Transcription:", transcribe_with_google(wav))
